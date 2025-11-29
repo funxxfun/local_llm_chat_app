@@ -35,13 +35,20 @@ client = OpenAI(
 )
 
 if prompt:
-  # ユーザーの入力を表示する
+  st.session_state.messages.append({"role": "user", "content": prompt})
+  # ユーザーのプロンプト（入力）を表示する
   with st.chat_message("user"):
       st.write(prompt)
 
+  # システムプロンプトを最初に追加する
+  if system_prompt.strip():
+      messages = [{"role": "system", "content": system_prompt}] + st.session_state.messages
+  else:
+      messages = st.session_state.messages
+
   response =client.chat.completions.create(
       model=model,
-      messages=[{"role": "user", "content": prompt}],
+      messages=messages,
       temperature=temperature
   )
 
@@ -50,5 +57,4 @@ if prompt:
     st.write(response.choices[0].message.content)
 
   # 会話の履歴を追加する
-  st.session_state.messages.append({"role": "user", "content": prompt})
   st.session_state.messages.append({"role": "assistant", "content": response.choices[0].message.content})
