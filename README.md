@@ -26,3 +26,12 @@ OpenAI：1.99.3
 Python：13.0
 
 Streamlit：1.40.1
+
+
+# 使用方法
+ターミナルでstreamlitを起動後、ブラウザを表示させてください
+```
+streamlit run udemy2.py
+```
+
+URL：http://localhost:8501/
