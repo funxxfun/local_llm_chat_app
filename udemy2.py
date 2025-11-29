@@ -46,15 +46,23 @@ if prompt:
   else:
       messages = st.session_state.messages
 
-  response =client.chat.completions.create(
-      model=model,
-      messages=messages,
-      temperature=temperature
-  )
 
   # LLMの応答を表示する
+  # ストリーミング応答のためのプレースホルダーを作成
   with st.chat_message("assistant"):
-    st.write(response.choices[0].message.content)
+    placeholder = st.empty()
+    stream_response = ""
+    stream =client.chat.completions.create(
+      model=model,
+      messages=messages,
+      temperature=temperature,
+      stream=True
+    )
+    
+    # ストリーミングで応答を受け取りながら逐次的に表示する
+    for chunk in stream:
+      stream_response += chunk.choices[0].delta.content
+      placeholder.write(stream_response)
 
   # 会話の履歴を追加する
-  st.session_state.messages.append({"role": "assistant", "content": response.choices[0].message.content})
+  st.session_state.messages.append({"role": "assistant", "content": stream_response})
