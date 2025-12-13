@@ -118,14 +118,19 @@ if prompt:
   else:
     final_prompt = prompt
 
-  st.session_state.messages.append({"role": "user", "content": final_prompt})
+  st.session_state.messages.append({"role": "user", "content": prompt})
 
   # システムプロンプトを最初に追加する
   if system_prompt.strip():
-      messages = [{"role": "system", "content": system_prompt}] + st.session_state.messages
+    # LLMに送るメッセージを別途作成
+    messages_for_llm = [{"role": "system", "content": system_prompt}]
+    # 過去の会話履歴を追加
+    messages_for_llm.extend(st.session_state.messages[:-1])
+    # 最新の質問だけRAGコンテキスト付きで追加
+    messages_for_llm.append({"role": "user", "content": final_prompt})
   else:
-      messages = st.session_state.messages
-
+    messages_for_llm = st.session_state.messages[:-1]
+    messages_for_llm.append({"role": "user", "content": final_prompt})
 
   # LLMの応答を表示する
   # ストリーミング応答のためのプレースホルダーを作成
@@ -134,7 +139,7 @@ if prompt:
     stream_response = ""
     stream =client.chat.completions.create(
       model=model,
-      messages=messages,
+      messages=messages_for_llm,
       temperature=temperature,
       stream=True
     )
